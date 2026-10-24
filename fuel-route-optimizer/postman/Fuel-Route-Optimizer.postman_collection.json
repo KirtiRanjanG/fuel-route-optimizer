@@ -1,0 +1,62 @@
+{
+  "info": {
+    "name": "Fuel Route Optimizer API",
+    "description": "Local Django API tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health check",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/health/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.test('healthy response', () => pm.expect(pm.response.json().status).to.eql('ok'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Route optimizer - Chicago to Indianapolis",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"start\": \"Chicago, Illinois, USA\",\n  \"finish\": \"Indianapolis, Indiana, USA\",\n  \"mpg\": 10,\n  \"max_range_miles\": 500\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "http://127.0.0.1:8000/api/route-optimizer/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is HTTP 200 or a documented external-service error', () => pm.expect([200,502]).to.include(pm.response.code));",
+              "if (pm.response.code === 200) { pm.test('route distance exists', () => pm.expect(pm.response.json().route.distance_miles).to.be.a('number')); }"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
